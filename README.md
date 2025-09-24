@@ -39,8 +39,10 @@ cp .env.example .env
 Edit `.env` with your MongoDB Atlas connection string:
 
 ```env
-MONGODB_CONNECTION_STRING=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
+MONGODB_CONNECTION_STRING=<your-mongodb-atlas-connection-string>
 ```
+
+Replace `<your-mongodb-atlas-connection-string>` with your actual MongoDB Atlas connection string from your cluster's "Connect" dialog.
 
 ### 3. Generate Data
 
@@ -226,8 +228,8 @@ The tool automatically configures sharding with:
 1. **Connection Timeout**
 
    ```bash
-   # Increase connection timeout
-   export MONGODB_CONNECTION_STRING="mongodb+srv://.../?connectTimeoutMS=30000"
+   # Increase connection timeout by adding connectTimeoutMS parameter to your connection string
+   # Example: add "?connectTimeoutMS=30000" to your MongoDB connection string
    ```
 
 2. **Memory Issues**
