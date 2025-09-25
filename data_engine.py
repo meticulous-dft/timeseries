@@ -6,7 +6,7 @@ import string
 import threading
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from config import data_config
 from data_generators import (
@@ -29,8 +29,8 @@ class GenerationStats:
     total_documents: int = 0
     documents_generated: int = 0
     bytes_generated: int = 0
-    start_time: datetime = None
-    end_time: datetime = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
 
     @property
     def duration_seconds(self) -> float:
@@ -140,40 +140,40 @@ class TimeSeriesDataGenerator:
 
         # Generate metric data based on type
         if metric_type == "cpu":
-            fields = generators["cpu"].generate(timestamp)
+            metrics = generators["cpu"].generate(timestamp)
         elif metric_type == "mem":
-            fields = generators["mem"].generate(timestamp)
+            metrics = generators["mem"].generate(timestamp)
         elif metric_type == "disk":
-            fields = generators["disk"].generate(timestamp)
+            metrics = generators["disk"].generate(timestamp)
         elif metric_type == "net":
-            fields = generators["net"].generate(timestamp)
-        elif metric_type == "diskio":
-            fields = generators["app"].generate_diskio_metrics(timestamp)
+            metrics = generators["net"].generate(timestamp)
+        elif metric_type == "diskio":  # disk I/O metrics
+            metrics = generators["app"].generate_diskio_metrics(timestamp)
         elif metric_type == "kernel":
-            fields = generators["app"].generate_kernel_metrics(timestamp)
+            metrics = generators["app"].generate_kernel_metrics(timestamp)
         elif metric_type == "nginx":
-            fields = generators["app"].generate_nginx_metrics(timestamp)
+            metrics = generators["app"].generate_nginx_metrics(timestamp)
         elif metric_type == "postgresql":
-            fields = generators["app"].generate_postgresql_metrics(timestamp)
+            metrics = generators["app"].generate_postgresql_metrics(timestamp)
         elif metric_type == "redis":
-            fields = generators["app"].generate_redis_metrics(timestamp)
+            metrics = generators["app"].generate_redis_metrics(timestamp)
         elif metric_type == "process":
-            fields = generators["app"].generate_process_metrics(timestamp)
+            metrics = generators["app"].generate_process_metrics(timestamp)
         elif metric_type == "filesystem":
-            fields = generators["app"].generate_filesystem_metrics(timestamp)
+            metrics = generators["app"].generate_filesystem_metrics(timestamp)
         elif metric_type == "system":
-            fields = generators["app"].generate_system_metrics(timestamp)
+            metrics = generators["app"].generate_system_metrics(timestamp)
         elif metric_type == "docker":
-            fields = generators["app"].generate_docker_metrics(timestamp)
+            metrics = generators["app"].generate_docker_metrics(timestamp)
         else:
             raise ValueError(f"Unknown metric type: {metric_type}")
 
         # Create base document
         doc = TimeSeriesDocument(
             timestamp=timestamp,
-            metadata=host_tags,
+            meta=host_tags,
             measurement=metric_type,
-            fields=fields,
+            metrics=metrics,
         )
 
         # Add padding to control document size
@@ -193,7 +193,7 @@ class TimeSeriesDataGenerator:
             "mem",
             "disk",
             "net",
-            "diskio",
+            "diskio",  # disk I/O metrics
             "kernel",
             "nginx",
             "postgresql",
@@ -250,7 +250,7 @@ class TimeSeriesDataGenerator:
             "mem",
             "disk",
             "net",
-            "diskio",
+            "diskio",  # disk I/O metrics
             "kernel",
             "nginx",
             "postgresql",

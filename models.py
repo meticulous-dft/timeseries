@@ -13,7 +13,7 @@ class MetricType(str, Enum):
     CPU = "cpu"
     MEMORY = "mem"
     DISK = "disk"
-    DISKIO = "diskio"
+    DISKIO = "diskio"  # Disk I/O metrics
     NETWORK = "net"
     KERNEL = "kernel"
     NGINX = "nginx"
@@ -139,11 +139,11 @@ class MemoryMetrics(BaseModel):
     swap_free: int = Field(ge=0)
     swap_used_percent: float = Field(ge=0.0, le=100.0)
     dirty: int = Field(ge=0)
-    writeback: int = Field(ge=0)
+    writeback: int = Field(ge=0)  # Memory being written back to disk
     mapped: int = Field(ge=0)
-    vmalloc_total: int = Field(ge=0)
-    vmalloc_used: int = Field(ge=0)
-    vmalloc_chunk: int = Field(ge=0)
+    vmalloc_total: int = Field(ge=0)  # Virtual memory allocation total
+    vmalloc_used: int = Field(ge=0)  # Virtual memory allocation used
+    vmalloc_chunk: int = Field(ge=0)  # Virtual memory allocation chunk
     huge_pages_total: int = Field(ge=0)
     huge_pages_free: int = Field(ge=0)
     huge_page_size: int = Field(ge=0)
@@ -158,12 +158,14 @@ class DiskMetrics(BaseModel):
     free: int = Field(ge=0)
     used: int = Field(ge=0)
     used_percent: float = Field(ge=0.0, le=100.0)
-    inodes_total: int = Field(ge=0)
-    inodes_free: int = Field(ge=0)
-    inodes_used: int = Field(ge=0)
+    inodes_total: int = Field(ge=0)  # Total file system inodes
+    inodes_free: int = Field(ge=0)  # Free file system inodes
+    inodes_used: int = Field(ge=0)  # Used file system inodes
 
     # Additional disk metrics
-    inodes_used_percent: float = Field(ge=0.0, le=100.0)
+    inodes_used_percent: float = Field(
+        ge=0.0, le=100.0
+    )  # File system nodes usage percentage
     device_name: str = Field(default="/dev/sda1")
     mount_point: str = Field(default="/")
     filesystem_type: str = Field(default="ext4")
@@ -202,7 +204,7 @@ class NetworkMetrics(BaseModel):
 
     # Additional network metrics
     interface_name: str = Field(default="eth0")
-    interface_speed_mbps: int = Field(ge=0)
+    interface_speed_mbps: int = Field(ge=0)  # Interface speed in mega-bits per second
     duplex_mode: str = Field(default="full")
     mtu_size: int = Field(ge=0)
     bytes_sent_per_sec: float = Field(ge=0.0)
@@ -248,11 +250,11 @@ class NginxMetrics(BaseModel):
 class PostgreSQLMetrics(BaseModel):
     """PostgreSQL database metrics."""
 
-    numbackends: int = Field(ge=0)
-    xact_commit: int = Field(ge=0)
-    xact_rollback: int = Field(ge=0)
-    blks_read: int = Field(ge=0)
-    blks_hit: int = Field(ge=0)
+    numbackends: int = Field(ge=0)  # Number of database backend connections
+    xact_commit: int = Field(ge=0)  # Database transaction commits
+    xact_rollback: int = Field(ge=0)  # Database transaction rollbacks
+    blks_read: int = Field(ge=0)  # Database blocks read from disk
+    blks_hit: int = Field(ge=0)  # Database blocks found in buffer cache
     tup_returned: int = Field(ge=0)
     tup_fetched: int = Field(ge=0)
     tup_inserted: int = Field(ge=0)
@@ -270,8 +272,12 @@ class RedisMetrics(BaseModel):
     used_memory_lua: int = Field(ge=0)
     rdb_changes_since_last_save: int = Field(ge=0)
     instantaneous_ops_per_sec: int = Field(ge=0)
-    instantaneous_input_kbps: float = Field(ge=0.0)
-    instantaneous_output_kbps: float = Field(ge=0.0)
+    instantaneous_input_kbps: float = Field(
+        ge=0.0
+    )  # Input rate in kilo-bytes per second
+    instantaneous_output_kbps: float = Field(
+        ge=0.0
+    )  # Output rate in kilo-bytes per second
     rejected_connections: int = Field(ge=0)
 
 
@@ -296,8 +302,8 @@ class FileSystemMetrics(BaseModel):
     open_files_percent: float = Field(ge=0.0, le=100.0)
     file_descriptors_used: int = Field(ge=0)
     file_descriptors_max: int = Field(ge=0)
-    dentries: int = Field(ge=0)
-    inodes_cached: int = Field(ge=0)
+    dentries: int = Field(ge=0)  # Directory entries cached
+    inodes_cached: int = Field(ge=0)  # File system nodes cached in memory
 
 
 class SystemMetrics(BaseModel):
@@ -335,11 +341,11 @@ class TimeSeriesDocument(BaseModel):
 
     # MongoDB time series required fields
     timestamp: datetime = Field(description="Measurement timestamp")
-    metadata: HostTags = Field(description="Host metadata tags")
+    meta: HostTags = Field(description="Host metadata tags")
 
     # Measurement data - only one metric type per document
     measurement: str = Field(description="Measurement type (cpu, mem, disk, etc.)")
-    fields: Dict[str, Union[int, float, str, bool, List[Union[int, float, str]]]] = (
+    metrics: Dict[str, Union[int, float, str, bool, List[Union[int, float, str]]]] = (
         Field(description="Metric values")
     )
 
@@ -355,9 +361,9 @@ class TimeSeriesDocument(BaseModel):
         """Convert to MongoDB document format."""
         doc = {
             "timestamp": self.timestamp,
-            "metadata": self.metadata.dict(),
+            "meta": self.meta.model_dump(),
             "measurement": self.measurement,
-            "fields": self.fields,
+            "metrics": self.metrics,
         }
 
         if self.padding:

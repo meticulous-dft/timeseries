@@ -1,15 +1,26 @@
 """Configuration settings for MongoDB Time Series Data Generator."""
 
 import os
+from typing import TYPE_CHECKING
 
-try:
-    from pydantic import Field, validator
+from pydantic import Field
+
+# Import BaseSettings from the appropriate module
+# In Pydantic v2, BaseSettings was moved to pydantic-settings
+if TYPE_CHECKING:
+    # For type checking, always use the modern import
     from pydantic_settings import BaseSettings
-except ImportError:
-    from pydantic import BaseSettings, Field
-from dotenv import load_dotenv
+else:
+    # At runtime, try the modern import first, then fallback
+    try:
+        from pydantic_settings import BaseSettings
+    except ImportError:
+        # Fallback for older pydantic versions (v1.x)
+        from pydantic import BaseSettings
 
-load_dotenv()
+from dotenv import load_dotenv  # python-dotenv package
+
+load_dotenv()  # Load environment variables from .env file
 
 
 class MongoConfig(BaseSettings):
@@ -90,10 +101,10 @@ class AppConfig(BaseSettings):
         default=10000, description="Progress update interval in documents"
     )
     enable_sharding: bool = Field(
-        default=True, description="Enable MongoDB sharding for time series collection"
+        default=False, description="Enable MongoDB sharding for time series collection"
     )
     create_indexes: bool = Field(
-        default=True, description="Create recommended indexes for time series queries"
+        default=False, description="Create recommended indexes for time series queries"
     )
 
     class Config:
