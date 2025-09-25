@@ -170,7 +170,7 @@ class MetricGenerator:
 class CPUMetricGenerator(MetricGenerator):
     """Generates realistic CPU metrics."""
 
-    def generate(self, timestamp: datetime) -> Dict[str, float]:
+    def generate(self, timestamp: datetime) -> Dict[str, Any]:
         """Generate CPU metrics for a given timestamp."""
         # Base CPU usage with seasonal patterns
         base_usage = self.generate_seasonal_pattern(timestamp, 30.0, 0.3)
@@ -262,7 +262,7 @@ class MemoryMetricGenerator(MetricGenerator):
             ]
         )
 
-    def generate(self, timestamp: datetime) -> Dict[str, int]:
+    def generate(self, timestamp: datetime) -> Dict[str, int | float]:
         """Generate memory metrics for a given timestamp."""
         # Memory usage with seasonal patterns
         base_usage_percent = self.generate_seasonal_pattern(timestamp, 60.0, 0.2)
@@ -304,7 +304,7 @@ class DiskMetricGenerator(MetricGenerator):
         )
         self.inodes_total = self.random.randint(1000000, 10000000)
 
-    def generate(self, timestamp: datetime) -> Dict[str, int]:
+    def generate(self, timestamp: datetime) -> Dict[str, int | float]:
         """Generate disk metrics for a given timestamp."""
         # Disk usage grows slowly over time
         days_since_start = (timestamp - self.base_timestamp).days
